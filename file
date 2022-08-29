@@ -1,0 +1,292 @@
+# Gauss Jordan Elimination
+import math
+def non_zero(row):
+  for i in range(len(row)):
+    if row[i] != 0:
+      return i
+
+def rref(matrix):
+  rows = len(matrix)
+  columns = len(matrix[0])
+  non_zero_index = -1
+
+  # Arrange the rows by leftmost non-zero entry
+  matrix.sort(key = non_zero)
+  for i in range(0, rows):
+  # Making the first non-zero element 1
+    for j in range(columns):
+      if not math.isclose(matrix[i][j], 0.0):
+        non_zero_index = j
+        matrix[i] = [x / matrix[i][j] for x in matrix[i]]
+        break
+
+  # Making leading coefficient column corresponding values 0
+    for j in range(rows):
+      if j == i:
+        continue
+      else:
+        ratio = matrix[j][non_zero_index] / matrix[i][non_zero_index]
+        row = [x * ratio for x in matrix[i]]
+        matrix[j] = [x - y for x, y in zip(matrix[j], row)]
+  print("The given matrix in RREF is:")
+  for row in matrix:
+    print(row)
+  return matrix
+
+lin_sys = ["1x1 + 1x2 + 2x3 = 8", "-1x1 - 2x2 + 3x3 = 1", "3x1 - 7x2 + 4x3= 10"]
+
+# Finding the augmented matrix
+aug = []
+for eqn in lin_sys:
+  row = []
+  for i in range(len(eqn)):
+    if eqn[i] == 'x':
+      if eqn[i - 2] == '-' or eqn[i - 3] == '-':
+        row.append(-int(eqn[i - 1]))
+      else:
+        row.append(int(eqn[i - 1]))
+    if eqn[i] == '=':
+      row.append(int(eqn[i + 1:]))
+  aug.append(row)
+    
+aug = rref(aug)
+rank = len(aug)
+zeros = [0] * len(aug[0])
+solution = []
+for row in aug:
+  if row == zeros:
+    rank -= 1
+# Unique Solution
+if rank == len(aug[0]) - 1:
+  for i in range(len(aug) - 1, -1, -1):
+    for j in range(len(aug[0]) - 1):
+      if math.isclose(aug[i][j], 0.0):
+        continue
+      else:
+        solution.insert(0, aug[i][len(aug[0]) - 1])
+  print("Unique Solution:", solution)
+# Infinite Solutions
+elif rank < len(aug[0]) - 1:
+  print("Infinite Solutions")
+# No solution
+else:
+  print("No Solution")
+###############################################################################################################################################
+#Gauss Jacobi
+
+lin_sys = ["2x + 5x2 = 21", "1x1 + 2x2 = 8"]
+# Finding the augmented matrix
+aug = []
+for eqn in lin_sys:
+  row = []
+  for i in range(len(eqn)):
+    if eqn[i] == 'x':
+      if eqn[i - 2] == '-' or eqn[i - 3] == '-':
+        row.append(-int(eqn[i - 1]))
+      else:
+        row.append(int(eqn[i - 1]))
+    if eqn[i] == '=':
+      row.append(int(eqn[i + 1:]))
+  aug.append(row)
+
+rows = len(aug)
+columns = len(aug[0])
+prev = [0] * (columns - 1)
+solutions = [0] * (columns - 1)
+
+for i in range(10):
+  for j in range(rows):
+    x = aug[j][columns - 1]
+    for k in range(columns - 1):
+      if k != j:
+        x -= aug[j][k] * prev[k]
+    solutions[j] = x / aug[j][j]
+
+  print("Iteration", i + 1)
+  print(solutions)
+  for i in range(len(solutions)):
+    prev[i] = solutions[i]
+  print("\n")
+for i in range(columns - 1):
+# print("x", i + 1, " = ", round(solutions[i]), sep = "")
+  print("x", i + 1, " = ", solutions[i], sep = "")
+  
+ ###############################################################################################################################################################
+ #Gauss Seidel method
+ lin_sys = ["3x + 1x2 = 11", "2x1 + 5x2 = 16"]
+# Finding the augmented matrix
+aug = []
+for eqn in lin_sys:
+  row = []
+  for i in range(len(eqn)):
+    if eqn[i] == 'x':
+      if eqn[i - 2] == '-' or eqn[i - 3] == '-':
+        row.append(-int(eqn[i - 1]))
+      else:
+        row.append(int(eqn[i - 1]))
+    if eqn[i] == '=':
+      row.append(int(eqn[i + 1:]))
+  aug.append(row)
+
+rows = len(aug)
+columns = len(aug[0])
+solutions = [0] * (columns - 1)
+for i in range(10):
+  for j in range(rows):
+    x = aug[j][columns - 1]
+    for k in range(columns - 1):
+      if k != j:
+        x -= aug[j][k] * solutions[k]
+    solutions[j] = x / aug[j][j]
+  print("Iteration", i + 1)
+  print(solutions)
+for i in range(columns - 1):
+  print("x", i + 1, " = ", solutions[i], sep = "")
+##############################################################################################################################################
+#Power Method
+import numpy as np
+
+def normalize(x):
+  max = abs(x).max()
+  newX = x / x.max()
+#   print(max, newX)
+
+
+  return max, newX
+
+  # matrix = np.array([[2, 3], [4, 10]])
+matrix = np.array([[2, 1], [0, -4]])
+
+order = len(matrix)
+x = np.ones((order, 1), dtype = int)
+
+for i in range(8):
+  x = np.dot(matrix, x)
+  l, x = normalize(x)
+
+print("Eigenvalue:", l)
+print("Eigenvector:", x)
+###############################################################################################################################################
+#Inverse Power method
+from sympy import *
+import numpy as np
+
+def eigenValues(matrix):
+  l = symbols('lambda')
+  order = len(matrix)
+  I = np.identity(order, dtype = int)
+  lI = I * l
+  expr = Matrix(lI - matrix).det()
+  eigValues = solve(expr)
+
+  return eigValues
+
+matrix = [[10, -8, -4], [-8, 13, 4], [-4, 5, 4]]
+eValues = eigenValues(matrix)
+# minE = min(eValues)
+minE = 1.9
+
+order = len(matrix)
+I = np.identity(order, dtype = int)
+lI = I * minE
+x = np.ones((order, 1), dtype = int)
+mu = 0
+v = 0
+
+for i in range(5):
+    y = np.linalg.inv(matrix - lI) * x
+    mu = np.amax(y)
+    v = minE + 1 / mu
+    x = (1 / mu) * y
+
+print(v)
+###################################################################################################################################################
+#Bisection Method
+def bisection(f, limit):
+    a = limit[0]
+    b = limit[1]
+    t = 0.0
+
+    t = float(a + b) / 2
+
+    while f.subs(x, t) > 0.00001 or f.subs(x, t) < -0.00001:
+        print("t =", t, "\nf(t) =", f.subs(x, t), end = "\n\n")
+        if f.subs(x, t) * f.subs(x, a) < 0:
+            b = t
+        elif f.subs(x, t) * f.subs(x, b) < 0:
+            a = t
+        else:
+            print("t NOT FOUND!")
+            break
+        t = float(a + b) / 2
+
+    print("SOLUTION\nx = {x}\nf(x) = {fx}".format(x = t, fx = f.subs(x, t)))
+
+bisection(f,limit)
+###################################################################################################################################################
+#Regula false
+def regula_false(f, limit):
+    a = limit[0]
+    b = limit[1]
+
+    if f.subs(x, a) < 0:
+        pass
+    else:
+        temp = b
+        b = a
+        a = temp
+
+    h = float(abs(f.subs(x, a)) * (b - a)) / float(abs(f.subs(x, a)) + abs(f.subs(x, b)))
+    t = float(a + h)
+
+    while f.subs(x, t) > 0.00001 or f.subs(x, t) < -0.00001:
+        print("t =", t, "\nf(t) =", f.subs(x, t), end = "\n\n")
+        if f.subs(x, t) < 0:
+            a = t
+        else:
+            b = t
+
+        h = float(abs(f.subs(x, a)) * (b - a)) / float(abs(f.subs(x, a)) + abs(f.subs(x, b)))
+        t = a + h
+
+    print("SOLUTION\nx = {x}\nf(x) = {fx}".format(x = t, fx = f.subs(x, t)))
+
+regula_false(f,limit)
+######################################################################################################################################################
+#Newton Raphson Method
+def newton_raphson(f, limit):
+    a = limit[0]
+    b = limit[1]
+    t = float(a + b) / 2
+
+    while f.subs(x, t) > 0.001 or f.subs(x, t) < -0.001:
+        print("t =", t, "\nf(t) =", f.subs(x, t), end = "\n\n")
+        t = t - f.subs(x, t) / diff(f, x).subs(x, t)
+
+    print("SOLUTION\nx = {x}\nf(x) = {fx}".format(x = t, fx = f.subs(x, t)))
+
+newton_raphson(f,limit)
+#########################################################################################################################################################
+#Fixed Point Iteration
+def fixed_point_iteration(f, limit):
+    a = float(limit[0])
+    b = float(limit[1])
+
+    phi = -(f - f.coeff(x, 1) * x) / f.coeff(x, 1)
+
+    if diff(phi, x).subs(x, a) < 1 and diff(phi, x).subs(x, b) < 1:
+        pass
+    else:
+        print("Cannot use Fixed Point Iteration Method")
+        return
+
+    t = float(a)
+
+    while f.subs(x, t) > 0.0001 or f.subs(x, t) < -0.0001:
+        print("t =", t, "\nf(t) =", f.subs(x, t), end = "\n\n")
+        t = phi.subs(x, t)
+
+    print("SOLUTION\nx = {x}\nf(x) = {fx}".format(x = t, fx = f.subs(x, t)))
+
+fixed_point_iteration(f,limit)
+#########################################################################################################################################################3
